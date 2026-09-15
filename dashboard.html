@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALTA — ROAS/CAC ყურადღების პანელი</title>
+<style>
+:root{
+  --purple:#632E93;
+  --purple-dark:#4A2170;
+  --magenta:#8D2791;
+  --red:#E3151A;
+  --orange-red:#E8581D;
+  --amber:#EF9300;
+  --bg:#F9F7FD;
+  --card:#FFFFFF;
+  --ink:#241436;
+  --muted:#6E6480;
+  --line:#E4DCEF;
+  --ok-green:#177245;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Segoe UI','Noto Sans Georgian','BPG Nino Mtavruli',system-ui,-apple-system,sans-serif;
+  font-size:14px; line-height:1.5;
+}
+.wrap{max-width:1500px;margin:0 auto;padding:0 20px 60px}
+
+/* ---------- header ---------- */
+header{background:var(--card);border-bottom:3px solid var(--purple);margin-bottom:22px}
+.hdr{max-width:1500px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.hdr img{height:44px;display:block}
+.hdr .titles{flex:1;min-width:220px}
+.hdr h1{margin:0;font-size:18px;font-weight:650;letter-spacing:-.2px}
+.hdr .sub{color:var(--muted);font-size:12.5px}
+.filebadge{
+  background:var(--bg);border:1px solid var(--line);border-radius:10px;
+  padding:8px 14px;font-size:12.5px;min-width:200px
+}
+.filebadge b{display:block;font-size:13px;color:var(--purple);word-break:break-all}
+.filebadge span{color:var(--muted)}
+
+/* ---------- drop zone ---------- */
+#drop{
+  background:var(--card);border:2px dashed #C9B6E0;border-radius:16px;
+  padding:56px 24px;text-align:center;cursor:pointer;transition:.15s;margin-top:28px
+}
+#drop:hover,#drop.over{border-color:var(--purple);background:#FBF8FF}
+#drop .big{font-size:18px;font-weight:600;color:var(--purple);margin-bottom:6px}
+#drop .small{color:var(--muted);font-size:13px}
+#drop .mark{font-size:34px;margin-bottom:10px;color:var(--amber)}
+
+/* ---------- panels ---------- */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px}
+.panel h2{margin:0 0 12px;font-size:14px;font-weight:650;color:var(--purple-dark);
+  text-transform:uppercase;letter-spacing:.7px}
+.panel h2 .note{text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted);font-size:12px;margin-left:8px}
+
+/* ---------- filters ---------- */
+.frow{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.fgroup{min-width:150px}
+.fgroup .lbl{font-size:11.5px;font-weight:650;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.6px;margin-bottom:6px}
+input[type=date],input[type=number]{
+  font-family:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--line);
+  border-radius:8px;background:#fff;color:var(--ink)
+}
+input[type=date]:focus,input[type=number]:focus{outline:2px solid #D9C7EE;border-color:var(--purple)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;
+  border-radius:20px;padding:4px 11px;font-size:12.5px;cursor:pointer;user-select:none;transition:.12s
+}
+.chip:hover{border-color:#B79BD4}
+.chip.on{background:var(--purple);border-color:var(--purple);color:#fff;font-weight:600}
+.chip input{display:none}
+button{
+  font-family:inherit;font-size:13px;font-weight:600;border-radius:9px;cursor:pointer;
+  padding:8px 16px;border:1px solid var(--purple);background:var(--purple);color:#fff;transition:.12s
+}
+button:hover{background:var(--purple-dark);border-color:var(--purple-dark)}
+button.ghost{background:#fff;color:var(--purple)}
+button.ghost:hover{background:#F4EDFB}
+
+/* ---------- rule bar ---------- */
+#rulebar{border-left:4px solid var(--amber)}
+.rule-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}
+.rule-line input{width:88px;text-align:center;font-weight:650;color:var(--purple)}
+.rule-hint{color:var(--muted);font-size:12.5px;margin-top:8px}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.kpi .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:5px;min-height:28px}
+.kpi .v{font-size:23px;font-weight:700;letter-spacing:-.5px;line-height:1.15}
+.kpi .u{font-size:12px;color:var(--muted);font-weight:400;margin-left:3px}
+.kpi.hero .v{color:var(--purple)}
+.kpi .neg{color:var(--red)}
+.kpi .pos{color:var(--ok-green)}
+
+/* ---------- attention ---------- */
+#attention{border-left:4px solid var(--red)}
+#attention.clean{border-left-color:var(--ok-green)}
+.att-head{font-size:15px;font-weight:650;margin-bottom:10px}
+.att-list{display:flex;gap:8px;flex-wrap:wrap}
+.att{background:#FEF2F2;border:1px solid #F6C8C9;border-radius:9px;padding:7px 12px;font-size:13px}
+.att b{color:var(--red)}
+.att.ch{background:#FFF7EA;border-color:#F6DCB0}
+.att.ch b{color:var(--orange-red)}
+
+/* ---------- chart ---------- */
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.legend .ln{width:16px;height:0;border-top:2px solid var(--purple);border-radius:0}
+svg{display:block;width:100%;height:auto}
+
+/* ---------- tables ---------- */
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child,th.l,td.l{text-align:left}
+thead th{
+  font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);
+  font-weight:650;border-bottom:2px solid var(--line);position:sticky;top:0;background:var(--card)
+}
+thead th.sortable{cursor:pointer;user-select:none}
+thead th.sortable:hover{color:var(--purple)}
+thead th .arrow{color:var(--purple);font-size:10px}
+tbody tr:hover{background:#FBF8FF}
+tr.flagged{background:#FEF5F5}
+tr.flagged:hover{background:#FDEDED}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:0}
+.dot.on{background:var(--red)}
+.dot.off{background:#D8CFE6}
+.na{color:var(--muted)}
+.up{color:var(--ok-green)}
+.down{color:var(--red)}
+td.sku{font-weight:650;color:var(--purple-dark)}
+td.nm{color:var(--muted);font-size:12.5px}
+tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:none;background:#FBF9FE}
+
+/* ---------- errors / warnings ---------- */
+#errors{background:#FEF2F2;border:1px solid #F0B9BA;border-left:4px solid var(--red);
+  border-radius:12px;padding:16px 18px;margin-top:24px}
+#errors h2{color:var(--red);margin:0 0 4px;font-size:16px}
+#errors .lead{color:#8A2B2E;margin-bottom:12px;font-size:13px}
+#errors table{font-size:13px}
+#errors td{border-bottom:1px solid #F3D3D4;padding:6px 10px}
+#errors td:first-child{font-weight:650;color:#8A2B2E;white-space:nowrap}
+#errors td.val{font-family:Consolas,monospace;color:var(--red);font-weight:600}
+.warn{background:#FFF9EC;border:1px solid #F0DCAE;border-left:4px solid var(--amber);
+  border-radius:10px;padding:10px 14px;font-size:12.5px;margin-bottom:8px;color:#6B4E12}
+.footnote{color:var(--muted);font-size:12px;margin-top:10px}
+.hidden{display:none !important}
+.bar-actions{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr">
+    <img id="logo" src="alta-logo.png" alt="ALTA">
+    <div class="titles">
+      <h1>ROAS/CAC ყურადღების პანელი</h1>
+      <div class="sub">რომელ პროდუქტსა და არხს სჭირდება ყურადღება მომავალ კვირას</div>
+    </div>
+    <div class="filebadge hidden" id="filebadge">
+      <b id="fname">—</b>
+      <span id="fmeta">—</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div id="drop">
+    <div class="mark">⬆</div>
+    <div class="big">ჩააგდეთ XLSX ფაილი ან დააწკაპუნეთ ასარჩევად</div>
+    <div class="small">გაყიდვების ოთხი ფურცელი და Ad_Spend. ახალი ფაილი სრულად ანაცვლებს წინას.</div>
+    <input type="file" id="file" accept=".xlsx,.xlsm" class="hidden">
+  </div>
+
+  <div id="errors" class="hidden">
+    <h2>ფაილი არ მიიღება</h2>
+    <div class="lead" id="errlead"></div>
+    <div class="tblwrap"><table id="errtbl"></table></div>
+    <div class="footnote">არც ერთი მაჩვენებელი არ გამოითვალა. შეასწორეთ ფაილი და ხელახლა ჩააგდეთ.</div>
+  </div>
+
+  <div id="app" class="hidden">
+
+    <div class="panel">
+      <h2>ფილტრები</h2>
+      <div class="frow">
+        <div class="fgroup">
+          <div class="lbl">თარიღი — დან</div>
+          <input type="date" id="from">
+        </div>
+        <div class="fgroup">
+          <div class="lbl">თარიღი — მდე</div>
+          <input type="date" id="to">
+        </div>
+        <div class="fgroup" style="flex:1">
+          <div class="lbl">კატეგორია</div>
+          <div class="chips" id="catChips"></div>
+        </div>
+        <div class="fgroup" style="flex:1">
+          <div class="lbl">არხი</div>
+          <div class="chips" id="chChips"></div>
+        </div>
+      </div>
+      <div class="frow" style="margin-top:14px">
+        <div class="fgroup" style="flex:1">
+          <div class="lbl">პროდუქტი (SKU)</div>
+          <div class="chips" id="skuChips"></div>
+        </div>
+        <div class="fgroup" style="align-self:flex-end">
+          <button class="ghost" id="reset">ფილტრების გასუფთავება</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="rulebar">
+      <h2>მონიშვნის წესი <span class="note">შეგიძლიათ შეცვალოთ — ცხრილი მაშინვე გადაითვლება</span></h2>
+      <div class="rule-line">
+        <span>მონიშნე პროდუქტი, თუ ბოლო კვირის ხარჯი</span>
+        <span>≥</span>
+        <input type="number" id="minSpend" min="0" step="50" value="300">
+        <span>GEL <b>და</b> ROAS &lt; <b>პროდუქტის უწაგებო ROAS</b></span>
+      </div>
+      <div class="rule-hint">
+        უწაგებო ROAS = 1 ÷ მარჟა, სადაც მარჟა = (შემოსავალი − თვითღირებულება) ÷ შემოსავალი.
+        გამოიქვითება მხოლოდ თვითღირებულება — სარეკლამო ხარჯი უკვე ROAS-ის მნიშვნელშია.
+        მარჟა მთელი არჩეული პერიოდიდან ითვლება, ROAS — ბოლო კვირიდან.
+        შედარება მკაცრია: ზუსტად უწაგებო წერტილზე მყოფი პროდუქტი არ ინიშნება.
+        მარჟა ნული ან უარყოფითი — ყოველთვის ინიშნება. გაყიდვის გარეშე — არასდროს.
+        არხებზე ხარჯის ზღვარი არ მოქმედებს და გამოიყენება არხის შერეული მარჟა.
+      </div>
+    </div>
+
+    <div class="panel" id="attention"></div>
+
+    <div class="kpis" id="kpis" style="margin-bottom:18px"></div>
+
+    <div class="panel">
+      <h2>დღიური დინამიკა <span class="note" id="chartNote"></span></h2>
+      <div class="legend">
+        <span><i style="background:var(--purple)"></i>სარეკლამო ხარჯი</span>
+        <span><i style="background:var(--amber)"></i>რეკლამაზე მიკუთვნებული შემოსავალი</span>
+        <span><i class="ln"></i>ROAS (მარჯვენა ღერძი)</span>
+        <span><i style="background:#EDE4F7"></i>ბოლო კვირა</span>
+        <span><i style="background:transparent;border-top:2px dashed var(--red);height:0;width:16px"></i>შერჩევის უწაგებო ROAS</span>
+      </div>
+      <div id="chart"></div>
+    </div>
+
+    <div class="panel">
+      <div class="bar-actions" style="margin-bottom:12px">
+        <h2 style="margin:0">პროდუქტები <span class="note" id="prodNote"></span></h2>
+        <button id="csv">CSV-ში ექსპორტი</button>
+      </div>
+      <div class="tblwrap"><table id="prodTbl"></table></div>
+      <div class="footnote">
+        ჯამები მთელი გაფილტრული პერიოდისაა და დამოუკიდებლად გამოითვლება, არა მწკრივების შეკრებით.
+        ხარჯი ერთხელ ითვლება და შეკვეთებზე არ მრავლდება.
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>სარეკლამო არხები <span class="note" id="chNote"></span></h2>
+      <div class="tblwrap"><table id="chTbl"></table></div>
+      <div class="footnote">Organic-ზე ROAS და CAC არ გამოიყენება — ხარჯი არ არსებობს.</div>
+    </div>
+
+    <div id="warns"></div>
+  </div>
+</div>
+
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="core.js"></script>
+<script>
+(function(){
+'use strict';
+var C = window.AltaCore;
+var DATA = null, VIEW = null, FILE = '';
+var rules = { minSpend: C.DEFAULT_RULES.minSpend };
+var sort = { key: null, dir: 1 };
+var sel = { categories: [], skus: [], channels: [] };
+
+var $ = function(id){ return document.getElementById(id); };
+var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){
+  return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); };
+
+/* ---------- ფაილის მიღება ---------- */
+var drop = $('drop'), fileInput = $('file');
+drop.addEventListener('click', function(){ fileInput.click(); });
+drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', function(){ drop.classList.remove('over'); });
+drop.addEventListener('drop', function(e){
+  e.preventDefault(); drop.classList.remove('over');
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', function(e){
+  if (e.target.files && e.target.files[0]) readFile(e.target.files[0]);
+});
+
+function readFile(f){
+  FILE = f.name;
+  var fr = new FileReader();
+  fr.onload = function(ev){
+    var wb;
+    try {
+      wb = XLSX.read(new Uint8Array(ev.target.result), { type:'array' });
+    } catch (err) {
+      return showErrors([{ sheet:f.name, row:null, what:'ფაილი ვერ წაიკითხა — XLSX არ არის ან დაზიანებულია', value:'' }]);
+    }
+    var sheets = {};
+    wb.SheetNames.forEach(function(n){
+      sheets[n] = XLSX.utils.sheet_to_json(wb.Sheets[n], { header:1, raw:true, defval:'', blankrows:true });
+    });
+    var res = C.load(sheets);
+    if (res.errors.length) { DATA = null; return showErrors(res.errors); }
+    DATA = res.data;
+    boot();
+  };
+  fr.readAsArrayBuffer(f);
+}
+
+function showErrors(errs){
+  $('app').classList.add('hidden');
+  $('filebadge').classList.add('hidden');
+  $('errors').classList.remove('hidden');
+  $('errlead').textContent = FILE + ' — ნაპოვნია ' + errs.length + ' შეცდომა. ჩატვირთვა შეჩერებულია.';
+  $('errtbl').innerHTML = errs.map(function(e){
+    var loc = e.sheet + (e.row ? ', მწკრივი ' + e.row : '');
+    return '<tr><td>' + esc(loc) + '</td><td>' + esc(e.what) + '</td>' +
+           '<td class="val">' + esc(e.value) + '</td></tr>';
+  }).join('');
+}
+
+/* ---------- ჩატვირთვის შემდეგ ---------- */
+function boot(){
+  $('errors').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('drop').classList.add('hidden');
+  $('filebadge').classList.remove('hidden');
+
+  $('fname').textContent = FILE;
+  $('fmeta').textContent = C.serialToISO(DATA.minDate) + ' — ' + C.serialToISO(DATA.maxDate) +
+    ' · ' + DATA.orders.length + ' შეკვეთა · ' + DATA.spend.length + ' ხარჯის ჩანაწერი';
+
+  sel = { categories: [], skus: [], channels: [] };
+  sort = { key:null, dir:1 };
+  $('from').value = C.serialToISO(DATA.minDate);
+  $('to').value   = C.serialToISO(DATA.maxDate);
+  $('from').min = $('to').min = C.serialToISO(DATA.minDate);
+  $('from').max = $('to').max = C.serialToISO(DATA.maxDate);
+
+  chips('catChips', DATA.categories, 'categories');
+  chips('skuChips', DATA.skus, 'skus');
+  chips('chChips', DATA.channels, 'channels');
+
+  var w = C.warnings(DATA);
+  $('warns').innerHTML = w.map(function(t){ return '<div class="warn">' + esc(t) + '</div>'; }).join('');
+
+  render();
+}
+
+function chips(host, values, key){
+  $(host).innerHTML = values.map(function(v){
+    return '<label class="chip" data-k="' + key + '" data-v="' + esc(v) + '">' + esc(v) + '</label>';
+  }).join('');
+  Array.prototype.forEach.call($(host).children, function(el){
+    el.addEventListener('click', function(){
+      var k = el.dataset.k, v = el.dataset.v, at = sel[k].indexOf(v);
+      if (at === -1) sel[k].push(v); else sel[k].splice(at, 1);
+      el.classList.toggle('on', sel[k].indexOf(v) !== -1);
+      render();
+    });
+  });
+}
+
+['from','to'].forEach(function(id){ $(id).addEventListener('change', render); });
+$('minSpend').addEventListener('input', function(){
+  var ms = parseFloat($('minSpend').value);
+  rules.minSpend = isFinite(ms) && ms >= 0 ? ms : 0;
+  render();
+});
+$('reset').addEventListener('click', function(){
+  sel = { categories: [], skus: [], channels: [] };
+  document.querySelectorAll('.chip.on').forEach(function(e){ e.classList.remove('on'); });
+  $('from').value = C.serialToISO(DATA.minDate);
+  $('to').value = C.serialToISO(DATA.maxDate);
+  sort = { key:null, dir:1 };
+  render();
+});
+
+/* ---------- რენდერი ---------- */
+function render(){
+  if (!DATA) return;
+  var from = C.isoToSerial($('from').value), to = C.isoToSerial($('to').value);
+  if (!isFinite(from)) from = DATA.minDate;
+  if (!isFinite(to)) to = DATA.maxDate;
+  if (from > to) { var t = from; from = to; to = t; }
+
+  VIEW = C.analyze(DATA, {
+    from: from, to: to,
+    categories: sel.categories, skus: sel.skus, channels: sel.channels
+  }, rules);
+
+  renderAttention();
+  renderKpis();
+  renderChart();
+  renderProducts();
+  renderChannels();
+
+  var lw = VIEW.lastWeek;
+  var wk = lw ? C.serialToISO(lw.from) + ' — ' + C.serialToISO(lw.to) : '—';
+  var pw = VIEW.prevWeek;
+  $('prodNote').textContent = 'ბოლო კვირა: ' + wk +
+    (VIEW.prevWeekHasData && pw ? ' · წინა კვირა: ' + C.serialToISO(pw.from) + ' — ' + C.serialToISO(pw.to) : ' · წინა კვირის მონაცემი არ არის');
+  $('chNote').textContent = 'ბოლო კვირა: ' + wk;
+  $('chartNote').textContent = C.serialToISO(from) + ' — ' + C.serialToISO(to);
+}
+
+function renderAttention(){
+  var p = VIEW.flaggedProducts, c = VIEW.flaggedChannels, el = $('attention');
+  if (!p.length && !c.length){
+    el.className = 'panel clean';
+    el.innerHTML = '<div class="att-head">ბოლო კვირაში მონიშვნის წესს არც ერთი პროდუქტი და არც ერთი არხი არ აკმაყოფილებს.</div>' +
+      '<div class="footnote">წესი: ხარჯი ≥ ' + rules.minSpend + ' GEL და ROAS &lt; პროდუქტის უწაგებო ROAS</div>';
+    return;
+  }
+  el.className = 'panel';
+  var html = '<div class="att-head">ყურადღება სჭირდება — ბოლო კვირა ' +
+    (VIEW.lastWeek ? C.serialToISO(VIEW.lastWeek.from) + ' — ' + C.serialToISO(VIEW.lastWeek.to) : '') + '</div><div class="att-list">';
+  p.forEach(function(x){
+    html += '<div class="att"><b>' + esc(x.sku) + '</b> ' + esc(x.name) +
+      ' — ROAS ' + C.fmtRoas(x.last.roas) + ', უწაგებო ' + C.fmtRoas(x.breakEven) +
+      ' (მარჟა ' + C.fmtMargin(x.margin) + '), ხარჯი ' + C.fmtGel(x.last.spend) + ' GEL</div>';
+  });
+  c.forEach(function(x){
+    html += '<div class="att ch"><b>' + esc(x.channel) + '</b> — ROAS ' + C.fmtRoas(x.last.roas) +
+      ', უწაგებო ' + C.fmtRoas(x.breakEven) + ' (შერეული მარჟა ' + C.fmtMargin(x.margin) +
+      '), ხარჯი ' + C.fmtGel(x.last.spend) + ' GEL</div>';
+  });
+  $('attention').innerHTML = html + '</div>';
+}
+
+function kpi(label, value, unit, cls){
+  return '<div class="kpi ' + (cls || '') + '"><div class="k">' + label + '</div>' +
+    '<div class="v">' + value + (unit ? '<span class="u">' + unit + '</span>' : '') + '</div></div>';
+}
+function renderKpis(){
+  var o = VIEW.overall;
+  $('kpis').innerHTML =
+    kpi('გაყიდვების შემოსავალი', C.fmtGel(o.salesRevenue), ' GEL') +
+    kpi('რეკლამაზე მიკუთვნებული', C.fmtGel(o.adRevenue), ' GEL') +
+    kpi('სარეკლამო ხარჯი', C.fmtGel(o.spend), ' GEL') +
+    kpi('ROAS', C.fmtRoas(o.roas), '', 'hero') +
+    kpi('მარჟა · უწაგებო ROAS', C.fmtMargin(o.margin) + ' · ' + C.fmtRoas(o.breakEven), '') +
+    kpi('ახალი ფასიანი მომხმარებლები', o.newCustomers, '') +
+    kpi('CAC', C.fmtCac(o.cac), o.cac === null ? '' : ' GEL', 'hero') +
+    '<div class="kpi"><div class="k">მოგება თვითღირებულებისა და რეკლამის შემდეგ</div>' +
+      '<div class="v ' + (o.profit < 0 ? 'neg' : 'pos') + '">' + C.fmtGel(o.profit) +
+      '<span class="u"> GEL</span></div></div>';
+}
+
+/* ---------- SVG გრაფიკი ---------- */
+function renderChart(){
+  var s = VIEW.series;
+  if (!s.length){ $('chart').innerHTML = '<div class="footnote">არჩეულ ფილტრში მონაცემი არ არის.</div>'; return; }
+  var W = 1400, H = 300, mL = 66, mR = 54, mT = 14, mB = 44;
+  var iw = W - mL - mR, ih = H - mT - mB;
+  var n = s.length, band = iw / n;
+
+  // ზღვრის ხაზი — არჩეული შერჩევის შერეული უწაგებო ROAS
+  var be = VIEW.overall.breakEven;
+  var beLine = (be !== null && isFinite(be)) ? be : null;
+
+  var maxGel = 0, maxRoas = beLine || 0;
+  s.forEach(function(d){
+    maxGel = Math.max(maxGel, d.spend, d.adRevenue);
+    if (d.roas !== null) maxRoas = Math.max(maxRoas, d.roas);
+  });
+  maxGel = maxGel || 1;
+  maxRoas = Math.ceil((maxRoas || 1) * 1.15 * 2) / 2;
+  var yG = function(v){ return mT + ih - (v / maxGel) * ih; };
+  var yR = function(v){ return mT + ih - (v / maxRoas) * ih; };
+
+  var g = [];
+
+  // ბოლო კვირის ფონი
+  var lw = s.filter(function(d){ return d.inLastWeek; });
+  if (lw.length){
+    var i0 = s.indexOf(lw[0]);
+    g.push('<rect x="' + (mL + i0 * band).toFixed(1) + '" y="' + mT + '" width="' +
+      (lw.length * band).toFixed(1) + '" height="' + ih + '" fill="#EDE4F7"/>');
+  }
+
+  // ბადე
+  for (var t = 0; t <= 4; t++){
+    var v = maxGel * t / 4, y = yG(v);
+    g.push('<line x1="' + mL + '" y1="' + y.toFixed(1) + '" x2="' + (W - mR) + '" y2="' + y.toFixed(1) +
+      '" stroke="#E4DCEF" stroke-width="1"/>');
+    g.push('<text x="' + (mL - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#6E6480">' +
+      C.fmtGel(v) + '</text>');
+    var vr = maxRoas * t / 4;
+    g.push('<text x="' + (W - mR + 8) + '" y="' + (yR(vr) + 4).toFixed(1) + '" font-size="11" fill="#6E6480">' +
+      vr.toFixed(1) + 'x</text>');
+  }
+
+  // ზოლები
+  var bw = Math.max(2, band * 0.36);
+  s.forEach(function(d, i){
+    var cx = mL + i * band + band / 2;
+    g.push('<rect x="' + (cx - bw - 1).toFixed(1) + '" y="' + yG(d.spend).toFixed(1) + '" width="' + bw.toFixed(1) +
+      '" height="' + Math.max(0, mT + ih - yG(d.spend)).toFixed(1) + '" fill="#632E93" rx="1.5"><title>' +
+      d.iso + '\nხარჯი: ' + C.fmtGel(d.spend) + ' GEL</title></rect>');
+    g.push('<rect x="' + (cx + 1).toFixed(1) + '" y="' + yG(d.adRevenue).toFixed(1) + '" width="' + bw.toFixed(1) +
+      '" height="' + Math.max(0, mT + ih - yG(d.adRevenue)).toFixed(1) + '" fill="#EF9300" rx="1.5"><title>' +
+      d.iso + '\nრეკლამის შემოსავალი: ' + C.fmtGel(d.adRevenue) + ' GEL</title></rect>');
+  });
+
+  // შერჩევის შერეული უწაგებო ROAS
+  if (beLine !== null) {
+    g.push('<line x1="' + mL + '" y1="' + yR(beLine).toFixed(1) + '" x2="' + (W - mR) +
+      '" y2="' + yR(beLine).toFixed(1) + '" stroke="#E3151A" stroke-width="1.5" stroke-dasharray="6 4"><title>' +
+      'შერჩევის უწაგებო ROAS: ' + C.fmtRoas(beLine) + '</title></line>');
+    g.push('<text x="' + (W - mR - 4) + '" y="' + (yR(beLine) - 5).toFixed(1) +
+      '" text-anchor="end" font-size="10.5" fill="#E3151A">უწაგებო ' + C.fmtRoas(beLine) + '</text>');
+  }
+
+  // ROAS-ის ხაზი — წყვეტით, სადაც N/A-ა
+  var seg = [], segs = [];
+  s.forEach(function(d, i){
+    if (d.roas === null){ if (seg.length) segs.push(seg); seg = []; return; }
+    seg.push([mL + i * band + band / 2, yR(d.roas)]);
+  });
+  if (seg.length) segs.push(seg);
+  segs.forEach(function(sg){
+    if (sg.length === 1){
+      g.push('<circle cx="' + sg[0][0].toFixed(1) + '" cy="' + sg[0][1].toFixed(1) + '" r="2.6" fill="#4A2170"/>');
+    } else {
+      g.push('<polyline fill="none" stroke="#4A2170" stroke-width="2" stroke-linejoin="round" points="' +
+        sg.map(function(p){ return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ') + '"/>');
+    }
+  });
+  s.forEach(function(d, i){
+    if (d.roas === null) return;
+    var cx = mL + i * band + band / 2;
+    g.push('<circle cx="' + cx.toFixed(1) + '" cy="' + yR(d.roas).toFixed(1) + '" r="2.4" fill="#4A2170"><title>' +
+      d.iso + '\nROAS: ' + C.fmtRoas(d.roas) + '</title></circle>');
+  });
+
+  // X ღერძი
+  var every = Math.max(1, Math.ceil(n / 18));
+  s.forEach(function(d, i){
+    if (i % every && i !== n - 1) return;
+    var cx = mL + i * band + band / 2;
+    g.push('<text x="' + cx.toFixed(1) + '" y="' + (mT + ih + 16) + '" text-anchor="middle" font-size="10" fill="#6E6480">' +
+      d.iso.slice(5) + '</text>');
+  });
+  g.push('<line x1="' + mL + '" y1="' + (mT + ih) + '" x2="' + (W - mR) + '" y2="' + (mT + ih) +
+    '" stroke="#C9BDDC" stroke-width="1"/>');
+  g.push('<text x="' + mL + '" y="' + (H - 6) + '" font-size="11" fill="#6E6480">GEL (მარცხნივ) · ROAS (მარჯვნივ)</text>');
+
+  $('chart').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' + g.join('') + '</svg>';
+}
+
+/* ---------- ცხრილები ---------- */
+var PCOLS = [
+  { k:'flagged', t:'', cls:'l', v:function(p){ return '<span class="dot ' + (p.flagged?'on':'off') + '"></span>'; }, raw:function(p){ return p.flagged?1:0; }, csv:function(p){ return p.flagged?'დიახ':'არა'; }, title:'მონიშვნა' },
+  { k:'sku', t:'SKU', cls:'l sku', v:function(p){ return esc(p.sku); }, raw:function(p){ return p.sku; } },
+  { k:'name', t:'დასახელება', cls:'l nm', v:function(p){ return esc(p.name); }, raw:function(p){ return p.name; } },
+  { k:'category', t:'კატეგორია', cls:'l nm', v:function(p){ return esc(p.category); }, raw:function(p){ return p.category; } },
+  { k:'margin', t:'მარჟა', v:function(p){ return p.margin===null?'<span class="na">N/A</span>':C.fmtMargin(p.margin); }, raw:function(p){ return p.margin===null?Infinity:p.margin; }, csv:function(p){ return C.fmtMargin(p.margin); } },
+  { k:'be', t:'უწაგებო ROAS', v:function(p){ return p.breakEven===null?'<span class="na">N/A</span>':C.fmtRoas(p.breakEven); }, raw:function(p){ return p.breakEven===null?-1:p.breakEven; }, csv:function(p){ return C.fmtRoas(p.breakEven); } },
+  { k:'lspend', t:'ბოლო კვირის ხარჯი', v:function(p){ return C.fmtGel(p.last.spend); }, raw:function(p){ return p.last.spend; } },
+  { k:'lrev', t:'ბოლო კვირის რეკლ. შემოსავალი', v:function(p){ return C.fmtGel(p.last.adRevenue); }, raw:function(p){ return p.last.adRevenue; } },
+  { k:'lroas', t:'ბოლო კვირის ROAS', v:function(p){ return p.last.roas===null?'<span class="na">N/A</span>':C.fmtRoas(p.last.roas); }, raw:function(p){ return p.last.roas===null?Infinity:p.last.roas; }, csv:function(p){ return C.fmtRoas(p.last.roas); } },
+  { k:'proas', t:'წინა კვირის ROAS', v:function(p){ return p.prev.roas===null?'<span class="na">N/A</span>':C.fmtRoas(p.prev.roas); }, raw:function(p){ return p.prev.roas===null?Infinity:p.prev.roas; }, csv:function(p){ return C.fmtRoas(p.prev.roas); } },
+  { k:'change', t:'ცვლილება', v:function(p){ if(p.change===null) return '<span class="na">—</span>';
+      return '<span class="' + (p.change>=0?'up':'down') + '">' + C.fmtChange(p.change) + '</span>'; },
+      raw:function(p){ return p.change===null?-Infinity:p.change; }, csv:function(p){ return C.fmtChange(p.change); } },
+  { k:'lnew', t:'ახალი ფასიანი მომხმ.', v:function(p){ return p.last.newCustomers; }, raw:function(p){ return p.last.newCustomers; } },
+  { k:'lcac', t:'ბოლო კვირის CAC', v:function(p){ return p.last.cac===null?'<span class="na">N/A</span>':C.fmtCac(p.last.cac); }, raw:function(p){ return p.last.cac===null?Infinity:p.last.cac; }, csv:function(p){ return C.fmtCac(p.last.cac); } },
+  { k:'pspend', t:'პერიოდის ხარჯი', v:function(p){ return C.fmtGel(p.period.spend); }, raw:function(p){ return p.period.spend; } },
+  { k:'proas2', t:'პერიოდის ROAS', v:function(p){ return p.period.roas===null?'<span class="na">N/A</span>':C.fmtRoas(p.period.roas); }, raw:function(p){ return p.period.roas===null?Infinity:p.period.roas; }, csv:function(p){ return C.fmtRoas(p.period.roas); } }
+];
+
+function sortedProducts(){
+  var rows = VIEW.products.slice();
+  if (!sort.key) return rows;
+  var col = PCOLS.filter(function(c){ return c.k === sort.key; })[0];
+  if (!col) return rows;
+  rows.sort(function(a,b){
+    var x = col.raw(a), y = col.raw(b);
+    if (typeof x === 'string') return sort.dir * x.localeCompare(y, 'ka');
+    return sort.dir * (x - y);
+  });
+  return rows;
+}
+
+function renderProducts(){
+  var rows = sortedProducts();
+  var head = '<thead><tr>' + PCOLS.map(function(c){
+    var arrow = sort.key === c.k ? ' <span class="arrow">' + (sort.dir === 1 ? '▲' : '▼') + '</span>' : '';
+    return '<th class="sortable ' + (c.cls || '') + '" data-k="' + c.k + '" title="' + (c.title || c.t) + '">' +
+      (c.t || '●') + arrow + '</th>';
+  }).join('') + '</tr></thead>';
+
+  var body = '<tbody>' + rows.map(function(p){
+    return '<tr class="' + (p.flagged ? 'flagged' : '') + '" title="' + esc(p.reason) + '">' +
+      PCOLS.map(function(c){ return '<td class="' + (c.cls || '') + '">' + c.v(p) + '</td>'; }).join('') + '</tr>';
+  }).join('') + '</tbody>';
+
+  var o = VIEW.overall, l = VIEW.lastWeekBlock;
+  var foot = '<tfoot><tr>' +
+    '<td class="l"></td><td class="l">ჯამი</td><td class="l"></td><td class="l"></td>' +
+    '<td>' + C.fmtMargin(o.margin) + '</td>' +
+    '<td>' + C.fmtRoas(o.breakEven) + '</td>' +
+    '<td>' + C.fmtGel(l.spend) + '</td>' +
+    '<td>' + C.fmtGel(l.adRevenue) + '</td>' +
+    '<td>' + C.fmtRoas(l.roas) + '</td>' +
+    '<td>' + C.fmtRoas(VIEW.prevWeekBlock.roas) + '</td>' +
+    '<td></td>' +
+    '<td>' + l.newCustomers + '</td>' +
+    '<td>' + C.fmtCac(l.cac) + '</td>' +
+    '<td>' + C.fmtGel(o.spend) + '</td>' +
+    '<td>' + C.fmtRoas(o.roas) + '</td>' +
+    '</tr></tfoot>';
+
+  $('prodTbl').innerHTML = head + body + foot;
+  Array.prototype.forEach.call($('prodTbl').querySelectorAll('th.sortable'), function(th){
+    th.addEventListener('click', function(){
+      var k = th.dataset.k;
+      if (sort.key === k) sort.dir = -sort.dir; else { sort.key = k; sort.dir = 1; }
+      renderProducts();
+    });
+  });
+}
+
+function renderChannels(){
+  var head = '<thead><tr><th class="l"></th><th class="l">არხი</th>' +
+    '<th>მარჟა</th><th>უწაგებო ROAS</th>' +
+    '<th>ბოლო კვირის ხარჯი</th><th>ბოლო კვირის შემოსავალი</th><th>ბოლო კვირის ROAS</th>' +
+    '<th>წინა კვირის ROAS</th><th>ცვლილება</th><th>ახალი ფასიანი მომხმ.</th><th>ბოლო კვირის CAC</th>' +
+    '<th>პერიოდის ხარჯი</th><th>პერიოდის ROAS</th></tr></thead>';
+  var body = '<tbody>' + VIEW.channels.map(function(c){
+    var na = '<span class="na">—</span>';
+    return '<tr class="' + (c.flagged ? 'flagged' : '') + '" title="' + esc(c.reason) + '">' +
+      '<td class="l"><span class="dot ' + (c.flagged ? 'on' : 'off') + '"></span></td>' +
+      '<td class="l sku">' + esc(c.channel) + '</td>' +
+      '<td>' + C.fmtMargin(c.margin) + '</td>' +
+      '<td>' + (c.paid ? C.fmtRoas(c.breakEven) : na) + '</td>' +
+      '<td>' + (c.paid ? C.fmtGel(c.last.spend) : na) + '</td>' +
+      '<td>' + C.fmtGel(c.paid ? c.last.adRevenue : c.last.salesRevenue) + '</td>' +
+      '<td>' + (c.paid ? (c.last.roas === null ? '<span class="na">N/A</span>' : C.fmtRoas(c.last.roas)) : na) + '</td>' +
+      '<td>' + (c.paid ? (c.prev.roas === null ? '<span class="na">N/A</span>' : C.fmtRoas(c.prev.roas)) : na) + '</td>' +
+      '<td>' + (c.paid && c.change !== null ? '<span class="' + (c.change >= 0 ? 'up' : 'down') + '">' + C.fmtChange(c.change) + '</span>' : na) + '</td>' +
+      '<td>' + (c.paid ? c.last.newCustomers : na) + '</td>' +
+      '<td>' + (c.paid ? (c.last.cac === null ? '<span class="na">N/A</span>' : C.fmtCac(c.last.cac)) : na) + '</td>' +
+      '<td>' + (c.paid ? C.fmtGel(c.period.spend) : na) + '</td>' +
+      '<td>' + (c.paid ? (c.period.roas === null ? '<span class="na">N/A</span>' : C.fmtRoas(c.period.roas)) : na) + '</td>' +
+      '</tr>';
+  }).join('') + '</tbody>';
+  $('chTbl').innerHTML = head + body;
+}
+
+/* ---------- CSV ---------- */
+function csvCell(v){
+  var s = String(v === null || v === undefined ? '' : v);
+  return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+$('csv').addEventListener('click', function(){
+  var f = VIEW.filters, lines = [];
+  var pick = function(a, all){ return a && a.length ? a.join(' / ') : 'ყველა (' + all + ')'; };
+
+  lines.push(['ALTA — პროდუქტების შეჯამება'].map(csvCell).join(','));
+  lines.push(['ფაილი', FILE].map(csvCell).join(','));
+  lines.push(['პერიოდი', C.serialToISO(f.from) + ' — ' + C.serialToISO(f.to)].map(csvCell).join(','));
+  lines.push(['კატეგორიები', pick(f.categories, DATA.categories.length)].map(csvCell).join(','));
+  lines.push(['პროდუქტები', pick(f.skus, DATA.skus.length)].map(csvCell).join(','));
+  lines.push(['არხები', pick(f.channels, DATA.channels.length)].map(csvCell).join(','));
+  lines.push(['მონიშვნის წესი', 'ბოლო კვირის ხარჯი >= ' + rules.minSpend + ' GEL და ROAS < პროდუქტის უწაგებო ROAS'].map(csvCell).join(','));
+  lines.push(['შერჩევის მარჟა', C.fmtMargin(VIEW.overall.margin) + ' → უწაგებო ' + C.fmtRoas(VIEW.overall.breakEven)].map(csvCell).join(','));
+  lines.push(['ბოლო კვირა', VIEW.lastWeek ? C.serialToISO(VIEW.lastWeek.from) + ' — ' + C.serialToISO(VIEW.lastWeek.to) : '—'].map(csvCell).join(','));
+  lines.push(['წინა კვირა', VIEW.prevWeekHasData && VIEW.prevWeek ? C.serialToISO(VIEW.prevWeek.from) + ' — ' + C.serialToISO(VIEW.prevWeek.to) : 'მონაცემი არ არის'].map(csvCell).join(','));
+  lines.push(['ექსპორტის დრო', new Date().toISOString().slice(0, 19).replace('T', ' ')].map(csvCell).join(','));
+  lines.push('');
+
+  var cols = PCOLS.slice();
+  cols[0] = { t: 'მონიშნული', csv: cols[0].csv };
+  lines.push(cols.map(function(c){ return csvCell(c.t); }).join(','));
+  sortedProducts().forEach(function(p){
+    lines.push(cols.map(function(c, i){
+      var col = i === 0 ? PCOLS[0] : c;
+      return csvCell(col.csv ? col.csv(p) : String(col.raw(p)));
+    }).join(','));
+  });
+
+  var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'alta-produktebi-' + C.serialToISO(VIEW.filters.from) + '-' + C.serialToISO(VIEW.filters.to) + '.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+});
+
+window.__alta = { get data(){ return DATA; }, get view(){ return VIEW; }, readFile: readFile, render: render };
+})();
+</script>
+</body>
+</html>
